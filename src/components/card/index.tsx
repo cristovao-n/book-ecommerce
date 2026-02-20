@@ -38,8 +38,8 @@ export function Card(props: CardProps) {
       </div>
 
       <div className="p-4 flex flex-col gap-3">
-        <div className="flex justify-between items-start">
-          <div className="flex flex-col">
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex flex-col min-h-21 max-h-full">
             <h3 className="font-bold text-xl line-clamp-2 text-gray-900">
               {productName}
             </h3>
