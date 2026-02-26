@@ -70,7 +70,7 @@ const cardPropsList = [
 
 export default function Products() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const pageSizeOptions = [5, 10, 20, 50];
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;

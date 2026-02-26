@@ -12,6 +12,20 @@ export const Header = () => {
         </Link>
       </div>
 
+      <div>
+        <ul className="flex justify-between gap-10 font-bold poiter pl-50">
+          <li>
+            <Link href={"/products"}>Produtos</Link>
+          </li>
+          <li>
+            <Link href={"/onsale"}>Promoções</Link>
+          </li>
+          <li>
+            <Link href={"/onsale"}>Destaques</Link>
+          </li>
+        </ul>
+      </div>
+
       <Flex gap={10}>
         <ul className="flex flex-row gap-10 pr-5">
           <li>

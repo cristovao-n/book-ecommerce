@@ -24,7 +24,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Header></Header>
-        <SimpleBreadcrumb/>
+        <div className="ml-4">
+          <SimpleBreadcrumb />
+        </div>
         {children}
       </body>
     </html>
