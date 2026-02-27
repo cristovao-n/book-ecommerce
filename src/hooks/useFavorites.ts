@@ -12,7 +12,6 @@ export function useFavorites() {
 
   useEffect(() => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
-    console.log(favorites)
   }, [favorites]);
 
   const toggleFavorite = (item: string) => {

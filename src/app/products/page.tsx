@@ -3,7 +3,21 @@
 import { useFavorites } from "@/src/hooks/useFavorites";
 import { Card } from "../../components/card";
 import { Pagination } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  description: string;
+  image: string;
+}
+// Dados MOCADOS COM API (SUBSTITUIR POR API PROPIA)
+const fetchProducts = async (): Promise<Product[]> => {
+  return await axios.get('https://fakestoreapi.com/products')
+    .then(response => response.data);
+}
 
 const cardPropsList = [
   {
@@ -69,25 +83,38 @@ const cardPropsList = [
 ];
 
 export default function Products() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const pageSizeOptions = [5, 10, 20, 50];
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentData = cardPropsList.slice(startIndex, endIndex);
+  const currentData = products.slice(startIndex, endIndex);
   const { toggleFavorite, favorites } = useFavorites();
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const productsList: Product[] = await fetchProducts();
+        setProducts(productsList);
+      } catch (error) {
+        console.error("Failed to load products:", error);
+      }
+    };
+    loadProducts();
+  }, []);
 
 
   return (
     <main className="flex flex-col gap-8 justify-center items-center p-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 p-2 w-full auto-rows-max">
         {currentData.map((props, index) => (
-          <Card key={index} {...props} favorites={favorites} toggleFavorite={toggleFavorite}/>
+          <Card qnt_reviews={0} avarage_rating={0} key={index} {...props} favorites={favorites} toggleFavorite={toggleFavorite}/>
         ))}
       </div>
 
       <Pagination
-        total={cardPropsList.length}
+        total={products.length}
         current={currentPage}
         pageSize={pageSize}
         pageSizeOptions={pageSizeOptions}

@@ -3,23 +3,25 @@
 import { Rate, Button } from "antd";
 import { ShoppingCart, Heart, HeartPlus } from "lucide-react";
 
-type CardProps = {
-  productName: string;
-  productPrice: number;
+interface CardProps {
+  id: number;
+  title: string;
+  price: number;
+  description: string;
+  image: string;
   qnt_reviews: number;
   avarage_rating: number;
-  productImage?: string;
   favorites: string[];
   toggleFavorite: (id: string) => void;
 };
 
 export function Card(props: CardProps) {
   const {
-    productName,
-    productPrice,
+    title,
+    price,
     qnt_reviews,
     avarage_rating,
-    productImage,
+    image,
     favorites,
     toggleFavorite,
   } = props;
@@ -28,9 +30,9 @@ export function Card(props: CardProps) {
     <div className="m-1 w-full max-w-xs bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
       <div className="w-full aspect-square overflow-hidden">
         <img
-          src={productImage}
-          alt={productName}
-          className="w-full h-full object-cover"
+          src={image}
+          alt={title}
+          className="w-full h-full object-fill"
         />
       </div>
 
@@ -38,18 +40,18 @@ export function Card(props: CardProps) {
         <div className="flex justify-between items-start gap-2">
           <div className="flex flex-col min-h-21 max-h-full">
             <h3 className="font-bold text-xl line-clamp-2 text-gray-900">
-              {productName}
+              {title}
             </h3>
 
             <p className="text-lg text-gray-900">
-              R$ {productPrice.toFixed(2).replace(".", ",")}
+              R$ {price.toFixed(2).replace(".", ",")}
             </p>
           </div>
           <span
-            onClick={() => toggleFavorite(productName)}
+            onClick={() => toggleFavorite(title)}
             className="cursor-pointer bg-slate-100 p-3 rounded-full"
           >
-            {favorites.includes(productName) ? (
+            {favorites.includes(title) ? (
               <Heart className="text-red-500" fill="currentColor" />
             ) : (
               <HeartPlus />
