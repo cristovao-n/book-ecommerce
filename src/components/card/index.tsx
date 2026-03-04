@@ -1,11 +1,16 @@
 "use client";
 
-import { Rate, Button } from "antd";
+import { Rate, Button, notification } from "antd";
 import { ShoppingCart, Heart, HeartPlus } from "lucide-react";
-import { CardProps, CartItem } from "@/src/types/types";
+import { CardProps, CartItem, NotificationType } from "@/src/types/types";
 import { formatCurrency } from "@/src/utils/utils";
+import { openNotificationWithIcon } from "@/src/utils/mesagesTemplate";
+import { useEffect, useState } from "react";
 
 export function Card(props: CardProps) {
+  const [api, contextHolder] = notification.useNotification();
+  const [notifyType, setNotifyType] = useState<NotificationType | null>(null);
+
   const {
     id,
     title,
@@ -16,18 +21,50 @@ export function Card(props: CardProps) {
     favorites,
     toggleFavorite,
     addItemToCart,
-    isIntoCart
+    isIntoCart,
   } = props;
 
   const item: CartItem = {
-    id: id,
-    title: title,
-    price: price,
+    id,
+    title,
+    price,
     quantity: 1,
   } as CartItem;
 
+  const onAddItem = (id: number) => {
+    if (isIntoCart(id)) {
+      setNotifyType("warning");
+      return;
+    }
+    addItemToCart(item);
+    setNotifyType("success");
+  };
+
+  useEffect(() => {
+    if (!notifyType) return;
+
+    if (notifyType === "success") {
+      openNotificationWithIcon(
+        api,
+        "success",
+        "Sucesso",
+        "Item adicionado ao carrinho!",
+      );
+    } else if (notifyType === "warning") {
+      openNotificationWithIcon(
+        api,
+        "warning",
+        "Aviso",
+        "Item já está no carrinho!",
+      );
+    }
+
+    setNotifyType(null);
+  }, [notifyType]);
+
   return (
     <div className="m-1 w-full max-w-xs bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      {contextHolder}
       <div className="w-full aspect-square overflow-hidden">
         <img src={image} alt={title} className="w-full h-full object-fill" />
       </div>
@@ -38,7 +75,6 @@ export function Card(props: CardProps) {
             <h3 className="font-bold text-xl line-clamp-2 text-gray-900">
               {title}
             </h3>
-
             <p className="text-lg text-gray-900">{formatCurrency(price)}</p>
           </div>
           <span
@@ -67,7 +103,7 @@ export function Card(props: CardProps) {
           type="primary"
           icon={<ShoppingCart size={16} />}
           className="w-full h-10"
-          onClick={() => isIntoCart(id) ? "" : addItemToCart(item)}
+          onClick={() => onAddItem(id)}
           block
         >
           Adicionar ao carrinho
