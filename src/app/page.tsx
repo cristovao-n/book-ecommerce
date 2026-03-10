@@ -1,22 +1,11 @@
-import { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "antd";
-import { ShoppingCart } from "lucide-react";
+"use client";
 
-export const metadata: Metadata = {
-  title: "AI Store",
-  description:
-    "Sua loja online - Encontre os melhores produtos com ótimos preços e ofertas exclusivas.",
-  openGraph: {
-    title: "AI Store",
-    description:
-      "Sua loja online - Encontre os melhores produtos com ótimos preços e ofertas exclusivas.",
-    siteName: "AI Store",
-    locale: "pt_BR",
-    type: "website",
-  },
-};
+import Link from "next/link";
+import { Card } from "../components/card";
+import { useFavorites } from "../hooks/useFavorites";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useCart } from "../hooks/useCart";
 
 type Product = {
   id: number;
@@ -25,21 +14,26 @@ type Product = {
   image: string;
 };
 
-async function getProducts(): Promise<Product[]> {
-  const res = await fetch("https://fakestoreapi.com/products");
+export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const data = await res.json();
+  const { toggleFavorite, favorites } = useFavorites();
+  const { addItemToCart, isIntoCart } = useCart();
 
-  return data.slice(0, 4);
-}
+  useEffect(() => {
+    const loadProducts = async () => {
+      const response = await axios.get("https://fakestoreapi.com/products");
 
-export default async function Home() {
-  const products = await getProducts();
+      setProducts(response.data.slice(0, 4));
+    };
+
+    loadProducts();
+  }, []);
 
   return (
     <main className="bg-gray-50 min-h-screen">
       <section
-        className="border-b bg-cover bg-right bg-no-repeat relative"
+        className="shadow-md bg-cover bg-right bg-no-repeat relative"
         style={{ backgroundImage: "url('/images/hero-products.png')" }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent"></div>
@@ -71,38 +65,19 @@ export default async function Home() {
             Produtos em destaque
           </h2>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-              <div
+              <Card
+                description={""}
                 key={product.id}
-                className="bg-white rounded-xl border p-4 hover:shadow-md transition"
-              >
-                <div className="h-48 flex items-center justify-center mb-4">
-                  <Image
-                    src={product.image}
-                    alt={product.title}
-                    width={150}
-                    height={150}
-                    className="object-contain h-full"
-                  />
-                </div>
-
-                <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
-                  {product.title}
-                </h3>
-
-                <p className="font-semibold text-gray-900 mb-4">
-                  R$ {product.price}
-                </p>
-
-                <Button
-                  type="primary"
-                  icon={<ShoppingCart size={16} />}
-                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  Adicionar ao carrinho
-                </Button>
-              </div>
+                {...product}
+                qnt_reviews={0}
+                avarage_rating={0}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
+                addItemToCart={addItemToCart}
+                isIntoCart={isIntoCart}
+              />
             ))}
           </div>
         </div>
