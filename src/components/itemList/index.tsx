@@ -7,7 +7,7 @@ import Link from "next/link";
 import { formatCurrency } from "@/src/utils/utils";
 
 export function ItemList(props: CartItem) {
-  const { id, title, price, quantity, setItemQuantity, removeCartItem } = props;
+  const { id, nome, preco, quantity, setItemQuantity, removeCartItem } = props;
   const onChange: InputNumberProps["onChange"] = (value) => {
     setItemQuantity(id, Number(value));
   };
@@ -21,8 +21,8 @@ export function ItemList(props: CartItem) {
 
   return (
     <div className="grid grid-cols-[1fr_150px_80px_24px] items-center gap-4 px-4 py-4 m-1 bg-white shadow-md rounded">
-      <Link href={`products/${title}`} className="font-bold min-w-0">
-        <span className="block truncate hover:text-blue-500">{title}</span>
+      <Link href={`/products/${id}`} className="font-bold min-w-0">
+        <span className="block truncate hover:text-blue-500">{nome}</span>
       </Link>
 
       <InputNumber
@@ -33,10 +33,15 @@ export function ItemList(props: CartItem) {
         onChange={onChange}
       />
 
-      <span className="font-semibold text-right">{formatCurrency(price * quantity)}</span>
+      <span className="font-semibold text-right">
+        {formatCurrency(preco * quantity)}
+      </span>
 
       <Tooltip title="Remover do carrinho">
-        <CircleX onClick={() => removeCartItem(id)} className="cursor-pointer hover:text-red-500 shrink-0" />
+        <CircleX
+          onClick={() => removeCartItem(id)}
+          className="cursor-pointer hover:text-red-500 shrink-0"
+        />
       </Tooltip>
     </div>
   );

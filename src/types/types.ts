@@ -1,7 +1,7 @@
 export interface CartItem {
   id: number;
-  title: string;
-  price: number;
+  nome: string;
+  preco: number;
   quantity: number;
   setItemQuantity: (id: number, quantity: number) => void; 
   isIntoCart?: (id: number) => boolean;
@@ -10,24 +10,28 @@ export interface CartItem {
 
 export interface CardProps {
   id: number;
-  title: string;
-  price: number;
-  description: string;
-  image: string;
+  nome: string;
+  preco: number;
+  descricao: string;
+  imagem: string;
   qnt_reviews: number;
   avarage_rating: number;
-  favorites: string[];
-  toggleFavorite: (id: string) => void;
+  favorites: number[];
+  toggleFavorite: (id: number) => void;
   addItemToCart: (item: CartItem) => void;
   isIntoCart: (id: number) => boolean;
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
 };
 
 export interface Product {
   id: number;
-  title: string;
-  price: number;
-  description: string;
-  image: string;
+  nome: string;
+  descricao: string;
+  imagem: string;
+  preco: number;
+  categoria: string;
+  tags: string[];
 }
 
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';

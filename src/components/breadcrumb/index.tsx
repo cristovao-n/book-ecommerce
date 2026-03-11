@@ -7,9 +7,16 @@ const renderPaths = () => {
   const currentPagePaths = usePathname();
   const paths = currentPagePaths.split("/").filter((seg) => seg.length > 0);
   const home = [{ title: <a href="/">Home</a> }];
-  const formatedPaths = paths.map((path) => ({
-    title: <a href={path}>{path.charAt(0).toUpperCase() + path.slice(1)}</a>,
-  }));
+  const formatedPaths = paths.map((segment, idx) => {
+    const href = `/${paths.slice(0, idx + 1).join("/")}`;
+    return {
+      title: (
+        <a href={href}>
+          {segment.charAt(0).toUpperCase() + segment.slice(1)}
+        </a>
+      ),
+    };
+  });
 
   return [...home, ...formatedPaths];
 };

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<number[]>([]);
 
   useEffect(() => {
     const storedData = localStorage.getItem("favorites");
@@ -14,7 +14,7 @@ export function useFavorites() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   }, [favorites]);
 
-  const toggleFavorite = (item: string) => {
+  const toggleFavorite = (item: number) => {
     setFavorites((prev) =>
       prev.includes(item)
         ? prev.filter((fav) => fav !== item)
@@ -22,7 +22,7 @@ export function useFavorites() {
     );
   };
 
-  const isFavorite = (item: string) => favorites.includes(item);
+  const isFavorite = (item: number) => favorites.includes(item);
 
   return { favorites, toggleFavorite, isFavorite };
 }

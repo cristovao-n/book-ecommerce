@@ -4,79 +4,15 @@ import { useFavorites } from "@/src/hooks/useFavorites";
 import { Card } from "../../components/card";
 import { Pagination } from "antd";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Product } from "@/src/types/types";
 import { useCart } from "@/src/hooks/useCart";
-
-// Dados MOCADOS COM API (SUBSTITUIR POR API PROPIA)
-const fetchProducts = async (): Promise<Product[]> => {
-  return await axios
-    .get("https://fakestoreapi.com/products")
-    .then((response) => response.data);
-};
-
-const cardPropsList = [
-  {
-    productName: "Livro de Ficção Científica",
-    productPrice: 45.99,
-    qnt_reviews: 250,
-    avarage_rating: 4.8,
-  },
-  {
-    productName: "Guia de Culinária Brasileira",
-    productPrice: 35.5,
-    qnt_reviews: 180,
-    avarage_rating: 4.6,
-  },
-  {
-    productName: "Romance de Mistério",
-    productPrice: 32.0,
-    qnt_reviews: 95,
-    avarage_rating: 4.3,
-  },
-  {
-    productName: "Manual de Programação em JavaScript",
-    productPrice: 89.9,
-    qnt_reviews: 520,
-    avarage_rating: 4.9,
-  },
-  {
-    productName: "Dicionário Técnico Inglês-Português",
-    productPrice: 55.75,
-    qnt_reviews: 142,
-    avarage_rating: 4.4,
-  },
-  {
-    productName: "Livro Infantil - Aventuras Mágicas",
-    productPrice: 24.99,
-    qnt_reviews: 310,
-    avarage_rating: 4.7,
-  },
-  {
-    productName: "Biografia de Grandes Personagens",
-    productPrice: 67.5,
-    qnt_reviews: 88,
-    avarage_rating: 4.5,
-  },
-  {
-    productName: "Poesia Contemporânea Brasileira",
-    productPrice: 38.25,
-    qnt_reviews: 156,
-    avarage_rating: 4.2,
-  },
-  {
-    productName: "Enciclopédia de História Universal",
-    productPrice: 125.0,
-    qnt_reviews: 75,
-    avarage_rating: 4.6,
-  },
-  {
-    productName: "Guia Prático de Desenvolvimento Pessoal",
-    productPrice: 42.8,
-    qnt_reviews: 420,
-    avarage_rating: 4.8,
-  },
-];
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  deleteProduct,
+  ensureSeededProducts,
+  listProducts,
+} from "@/src/lib/productsRepo";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -88,50 +24,65 @@ export default function Products() {
   const currentData = products.slice(startIndex, endIndex);
   const { toggleFavorite, favorites } = useFavorites();
   const { addItemToCart, isIntoCart } = useCart();
+  const router = useRouter();
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const productsList: Product[] = await fetchProducts();
-        setProducts(productsList);
-      } catch (error) {
-        console.error("Failed to load products:", error);
-      }
-    };
-    loadProducts();
+    ensureSeededProducts();
+    setProducts(listProducts());
   }, []);
 
-  return (
-    <main className="flex flex-col gap-8 justify-center items-center p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 p-2 w-full auto-rows-max">
-        {currentData.map((props, index) => (
-          <Card
-            qnt_reviews={0}
-            avarage_rating={0}
-            key={index}
-            {...props}
-            favorites={favorites}
-            toggleFavorite={toggleFavorite}
-            addItemToCart={addItemToCart}
-            isIntoCart={isIntoCart}
-          />
-        ))}
-      </div>
+  const refresh = () => setProducts(listProducts());
 
-      <Pagination
-        total={products.length}
-        current={currentPage}
-        pageSize={pageSize}
-        pageSizeOptions={pageSizeOptions}
-        showSizeChanger
-        showTotal={(total) => `Total ${total} items`}
-        responsive
-        onChange={(page, size) => {
-          setCurrentPage(page);
-          setPageSize(size);
-        }}
-        size="large"
-      />
+  const onDelete = (id: number) => {
+    deleteProduct(id);
+    refresh();
+  };
+
+  return (
+    <main className="p-4">
+      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+        <div className="w-full flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Produtos</h1>
+          <Link
+            href="/products/new"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            Novo produto
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 p-2 w-full auto-rows-max">
+          {currentData.map((props) => (
+            <Card
+              qnt_reviews={0}
+              avarage_rating={0}
+              key={props.id}
+              {...props}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+              addItemToCart={addItemToCart}
+              isIntoCart={isIntoCart}
+              onEdit={(id) => router.push(`/products/${id}/edit`)}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+
+        <Pagination
+          total={products.length}
+          current={currentPage}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          showSizeChanger
+          showTotal={(total) => `Total ${total} items`}
+          responsive
+          onChange={(page, size) => {
+            setCurrentPage(page);
+            setPageSize(size);
+          }}
+          size="large"
+        />
+      </div>
     </main>
   );
 }

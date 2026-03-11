@@ -4,15 +4,9 @@ import Link from "next/link";
 import { Card } from "../../components/card";
 import { useFavorites } from "../../hooks/useFavorites";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useCart } from "../../hooks/useCart";
-
-type Product = {
-  id: number;
-  title: string;
-  price: number;
-  image: string;
-};
+import { ensureSeededProducts, listProducts } from "@/src/lib/productsRepo";
+import { Product } from "@/src/types/types";
 
 export default function HomeClient() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,13 +15,8 @@ export default function HomeClient() {
   const { addItemToCart, isIntoCart } = useCart();
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const response = await axios.get("https://fakestoreapi.com/products");
-
-      setProducts(response.data.slice(0, 4));
-    };
-
-    loadProducts();
+    ensureSeededProducts();
+    setProducts(listProducts().slice(0, 4));
   }, []);
 
   return (
@@ -68,7 +57,6 @@ export default function HomeClient() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product) => (
               <Card
-                description={""}
                 key={product.id}
                 {...product}
                 qnt_reviews={0}
