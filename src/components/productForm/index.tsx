@@ -39,6 +39,7 @@ export function ProductForm({
               descricao: "",
               imagem: "",
               preco: 0,
+              estoque: 0,
               categoria: "",
               tagsText: "",
               tags: [],
@@ -50,6 +51,7 @@ export function ProductForm({
           descricao: values.descricao,
           imagem: values.imagem,
           preco: Number(values.preco),
+          estoque: Number(values.estoque),
           categoria: values.categoria,
           tags: parseTagsText(values.tagsText),
         });
@@ -90,6 +92,14 @@ export function ProductForm({
           style={{ width: "100%" }}
           stringMode
         />
+      </Form.Item>
+
+      <Form.Item
+        label="Estoque"
+        name="estoque"
+        rules={[{ required: true, message: "Informe o estoque" }]}
+      >
+        <InputNumber min={0} step={1} style={{ width: "100%" }} />
       </Form.Item>
 
       <Form.Item

@@ -2,12 +2,21 @@ import { Product } from "@/src/types/types";
 
 const STORAGE_KEY = "products";
 
+const DEFAULT_STOCK = 10;
+
 function safeParseProducts(raw: string | null): Product[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed as Product[];
+    return (parsed as Product[]).map((p) => ({
+      ...p,
+      estoque:
+        typeof (p as any).estoque === "number" && Number.isFinite((p as any).estoque)
+          ? (p as any).estoque
+          : DEFAULT_STOCK,
+      tags: Array.isArray((p as any).tags) ? (p as any).tags : [],
+    }));
   } catch {
     return [];
   }
@@ -42,6 +51,7 @@ export function ensureSeededProducts() {
       preco: 45.99,
       categoria: "Ficção",
       tags: ["sci-fi", "aventura"],
+      estoque: 10,
     },
     {
       id: 2,
@@ -51,6 +61,7 @@ export function ensureSeededProducts() {
       preco: 35.5,
       categoria: "Culinária",
       tags: ["receitas", "brasil"],
+      estoque: 10,
     },
     {
       id: 3,
@@ -60,6 +71,7 @@ export function ensureSeededProducts() {
       preco: 89.9,
       categoria: "Tecnologia",
       tags: ["javascript", "web"],
+      estoque: 10,
     },
     {
       id: 4,
@@ -69,6 +81,7 @@ export function ensureSeededProducts() {
       preco: 32.0,
       categoria: "Romance",
       tags: ["mistério", "suspense"],
+      estoque: 10,
     },
   ];
 
@@ -110,5 +123,33 @@ export function updateProduct(id: number, input: ProductInput): Product {
 export function deleteProduct(id: number) {
   const products = readAll();
   writeAll(products.filter((p) => p.id !== id));
+}
+
+export function decrementInventory(
+  lines: Array<{ productId: number; quantity: number }>,
+) {
+  const products = readAll();
+  const byId = new Map(products.map((p) => [p.id, p]));
+
+  for (const line of lines) {
+    const p = byId.get(line.productId);
+    if (!p) throw new Error(`Produto ${line.productId} não encontrado`);
+    if (line.quantity <= 0 || !Number.isFinite(line.quantity)) {
+      throw new Error("Quantidade inválida");
+    }
+    if (p.estoque < line.quantity) {
+      throw new Error(`Estoque insuficiente: ${p.nome}`);
+    }
+  }
+
+  const next = products.map((p) => {
+    const orderedQty = lines
+      .filter((l) => l.productId === p.id)
+      .reduce((acc, l) => acc + l.quantity, 0);
+    if (!orderedQty) return p;
+    return { ...p, estoque: p.estoque - orderedQty };
+  });
+
+  writeAll(next);
 }
 

@@ -44,6 +44,7 @@ export default function ProductDetailsPage() {
         <div className="flex flex-col">
           <h1 className="text-xl font-semibold">{product.nome}</h1>
           <span className="text-gray-600">{formatCurrency(product.preco)}</span>
+          <span className="text-gray-600">Estoque: {product.estoque}</span>
         </div>
 
         <div className="flex items-center gap-2">
