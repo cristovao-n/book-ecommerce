@@ -52,6 +52,7 @@ export default function EditProductPage() {
             descricao: product.descricao,
             imagem: product.imagem,
             preco: product.preco,
+            estoque: product.estoque,
             categoria: product.categoria,
             tags: product.tags,
           }}

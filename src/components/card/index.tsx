@@ -27,6 +27,7 @@ export function Card(props: CardProps) {
     descricao,
     categoria,
     tags,
+    estoque,
     qnt_reviews,
     avarage_rating,
     imagem,
@@ -43,9 +44,13 @@ export function Card(props: CardProps) {
     nome,
     preco,
     quantity: 1,
-  } as CartItem;
+  };
 
   const onAddItem = (id: number) => {
+    if (estoque <= 0) {
+      setNotifyType("warning");
+      return;
+    }
     if (isIntoCart(id)) {
       setNotifyType("warning");
       return;
@@ -69,7 +74,7 @@ export function Card(props: CardProps) {
         api,
         "warning",
         "Aviso",
-        "Item já está no carrinho!",
+        estoque <= 0 ? "Produto sem estoque!" : "Item já está no carrinho!",
       );
     }
 
@@ -129,6 +134,7 @@ export function Card(props: CardProps) {
                 {descricao}
               </p>
             )}
+            <p className="mt-2 text-xs text-gray-600">Estoque: {estoque}</p>
             <p className="mt-2 text-lg font-semibold text-gray-900">
               {formatCurrency(preco)}
             </p>

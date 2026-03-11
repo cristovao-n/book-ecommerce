@@ -16,6 +16,10 @@ export const Header = () => {
         <Link className="hover:text-blue-500 bold" href={"/products"}>
           Produtos
         </Link>
+
+        <Link className="hover:text-blue-500 bold" href={"/orders"}>
+          Pedidos
+        </Link>
       </div>
 
       <Flex gap={10}>

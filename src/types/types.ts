@@ -3,8 +3,10 @@ export interface CartItem {
   nome: string;
   preco: number;
   quantity: number;
-  setItemQuantity: (id: number, quantity: number) => void; 
-  isIntoCart?: (id: number) => boolean;
+}
+
+export interface CartItemRowProps extends CartItem {
+  setItemQuantity: (id: number, quantity: number) => void;
   removeCartItem: (id: number) => void;
 }
 
@@ -16,6 +18,7 @@ export interface CardProps {
   imagem: string;
   categoria: string;
   tags: string[];
+  estoque: number;
   qnt_reviews: number;
   avarage_rating: number;
   favorites: number[];
@@ -34,6 +37,21 @@ export interface Product {
   preco: number;
   categoria: string;
   tags: string[];
+  estoque: number;
 }
 
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';
+
+export interface OrderLine {
+  productId: number;
+  nome: string;
+  preco: number;
+  quantity: number;
+}
+
+export interface Order {
+  id: number;
+  createdAt: string; // ISO
+  total: number;
+  items: OrderLine[];
+}

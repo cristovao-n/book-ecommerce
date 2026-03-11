@@ -42,6 +42,8 @@ export function useCart() {
     );
   };
 
+  const clearCart = () => setCartItem([]);
+
   return {
     cartItems,
     isMounted,
@@ -49,5 +51,6 @@ export function useCart() {
     setItemQuantity,
     isIntoCart,
     removeCartItem,
+    clearCart,
   };
 }

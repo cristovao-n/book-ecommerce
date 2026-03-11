@@ -1,12 +1,12 @@
 "use client";
 
-import { CartItem } from "@/src/types/types";
+import { CartItemRowProps } from "@/src/types/types";
 import { InputNumber, InputNumberProps, Tooltip } from "antd";
 import { CircleX } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/src/utils/utils";
 
-export function ItemList(props: CartItem) {
+export function ItemList(props: CartItemRowProps) {
   const { id, nome, preco, quantity, setItemQuantity, removeCartItem } = props;
   const onChange: InputNumberProps["onChange"] = (value) => {
     setItemQuantity(id, Number(value));
