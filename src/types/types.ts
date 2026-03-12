@@ -63,3 +63,21 @@ export interface CheckoutItem {
   descricao?: string;
   imagem?: string;
 }
+
+export interface SessionData {
+  status: string;
+  customerEmail?: string;
+  customerName?: string;
+  amountTotal?: number;
+  lineItems?: {
+    description: string | null;
+    amount_total: number;
+    quantity: number | null;
+  }[];
+}
+
+export interface PendingOrder {
+  items: CartItem[];
+  total: number;
+  frete: { servico: string; prazo: string; preco: number } | null;
+}
