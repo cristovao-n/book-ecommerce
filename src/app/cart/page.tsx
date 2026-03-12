@@ -8,7 +8,7 @@ import {
   ensureSeededProducts,
 } from "@/src/lib/productsRepo";
 import { formatCurrency } from "@/src/utils/utils";
-import { Button, Divider, Input, Radio, Select, Spin, notification } from "antd";
+import { Button, Divider, Input, Radio, Spin, notification } from "antd";
 import { Search, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -70,17 +70,6 @@ async function buscarCoordenadasPorCidade(
   }
 }
 
-const handleCheckout = async (total: number) => {
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ total }),
-    });
-
-    const { url } = await res.json();
-    window.location.href = url;
-  };
-
 export default function CartPage() {
   const { cartItems, setItemQuantity, removeCartItem, clearCart } = useCart();
   const [total, setTotal] = useState<number>(0);
@@ -97,14 +86,55 @@ export default function CartPage() {
 
   useEffect(() => {
     setTotal(
-      cartItems.reduce(
-        (acc, current) => (acc += current.preco * current.quantity),
-        0,
-      ),
+      cartItems.reduce((acc, current) => acc + current.preco * current.quantity, 0),
     );
   }, [cartItems]);
 
   const totalComFrete = total + (freteSelecionado?.preco ?? 0);
+
+  const handleCheckout = async () => {
+    if (!cartItems.length) return;
+    setIsPlacing(true);
+
+    try {
+      const items = cartItems.map((i) => ({
+        nome: i.nome,
+        preco: i.preco,
+        quantity: i.quantity,
+      }));
+
+      if (freteSelecionado && freteSelecionado.preco > 0) {
+        items.push({
+          nome: `Frete - ${freteSelecionado.servico} (${freteSelecionado.prazo})`,
+          preco: freteSelecionado.preco,
+          quantity: 1,
+        });
+      }
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error ?? "Erro ao iniciar checkout");
+      }
+
+      const { url } = await res.json();
+
+      window.location.href = url;
+
+    } catch (e) {
+      notification.error({
+        message: "Não foi possível finalizar",
+        description: e instanceof Error ? e.message : "Erro ao processar o pedido.",
+        placement: "bottomRight",
+      });
+      setIsPlacing(false);
+    }
+  };
 
   const handleCalcularFrete = async () => {
     const cepLimpo = cep.replace(/\D/g, "");
@@ -131,21 +161,14 @@ export default function CartPage() {
 
       setEndereco(dadosCep);
 
-      const coords = await buscarCoordenadasPorCidade(
-        dadosCep.localidade,
-        dadosCep.uf,
-      );
+      const coords = await buscarCoordenadasPorCidade(dadosCep.localidade, dadosCep.uf);
 
       if (!coords) {
         setFreteErro("Não foi possível calcular a distância para este CEP.");
         return;
       }
 
-      const distancia = calcularDistanciaKm(
-        ORIGEM.lat, ORIGEM.lng,
-        coords.lat, coords.lng,
-      );
-
+      const distancia = calcularDistanciaKm(ORIGEM.lat, ORIGEM.lng, coords.lat, coords.lng);
       const distanciaArredondada = Math.round(distancia);
       setDistanciaKm(distanciaArredondada);
 
@@ -212,7 +235,7 @@ export default function CartPage() {
                   quantity: i.quantity,
                 })),
               });
-              handleCheckout(total);
+              handleCheckout();
               clearCart();
               notification.success({
                 title: "Pedido realizado",
@@ -235,8 +258,11 @@ export default function CartPage() {
           Finalizar compra
         </Button>
       </section>
+
       <Divider className="p-4" />
+
       <div className="flex flex-row gap-4">
+        {/* Lista de itens */}
         <section className="flex-1">
           {cartItems.length > 0 ? (
             cartItems.map((item) => (

@@ -1,20 +1,31 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/src/lib/stripe';
+import { CheckoutItem } from '@/src/types/types';
 
 export async function POST(req: Request) {
   try {
-    const { priceId } = await req.json();
+    const { items }: { items: CheckoutItem[] } = await req.json();
 
-    if (!priceId) {
-      return NextResponse.json({ error: 'priceId é obrigatório' }, { status: 400 });
+    if (!items || items.length === 0) {
+      return NextResponse.json({ error: 'Carrinho vazio' }, { status: 400 });
     }
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
+      line_items: items.map((item) => ({
+        quantity: item.quantity,
+        price_data: {
+          currency: 'brl',
+          product_data: {
+            name: item.nome,
+            description: item.descricao,
+            images: item.imagem ? [item.imagem] : undefined,
+          },
+          unit_amount: Math.round(item.preco * 100),
+        },
+      })),
+      success_url: `${process.env.NEXT_PUBLIC_URL}/orders`,
     });
 
     return NextResponse.json({ url: session.url });

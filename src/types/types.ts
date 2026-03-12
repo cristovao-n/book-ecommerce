@@ -55,3 +55,11 @@ export interface Order {
   total: number;
   items: OrderLine[];
 }
+
+export interface CheckoutItem {
+  nome: string;
+  preco: number;
+  quantity: number;
+  descricao?: string;
+  imagem?: string;
+}
