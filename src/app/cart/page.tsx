@@ -235,14 +235,13 @@ export default function CartPage() {
                   quantity: i.quantity,
                 })),
               });
-              handleCheckout();
-              clearCart();
               notification.success({
                 title: "Pedido realizado",
                 description: "Seu pedido foi registrado com sucesso.",
                 placement: "bottomRight",
               });
-              router.push("/orders");
+              await handleCheckout();
+              clearCart();
             } catch (e) {
               notification.error({
                 title: "Não foi possível finalizar",
@@ -262,7 +261,6 @@ export default function CartPage() {
       <Divider className="p-4" />
 
       <div className="flex flex-row gap-4">
-        {/* Lista de itens */}
         <section className="flex-1">
           {cartItems.length > 0 ? (
             cartItems.map((item) => (

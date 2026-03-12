@@ -25,7 +25,7 @@ export async function POST(req: Request) {
           unit_amount: Math.round(item.preco * 100),
         },
       })),
-      success_url: `${process.env.NEXT_PUBLIC_URL}/orders`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
     });
 
     return NextResponse.json({ url: session.url });
