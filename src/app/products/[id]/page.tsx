@@ -2,20 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  deleteProduct,
-  ensureSeededProducts,
-  getProduct,
-} from "@/src/lib/productsRepo";
+import { deleteProduct, ensureSeededProducts, getProduct } from "@/src/lib/productsRepo";
 import { Product } from "@/src/types/types";
 import { Button, Popconfirm, Tag } from "antd";
 import { formatCurrency } from "@/src/utils/utils";
 import { BackLink } from "@/src/components/backLink";
+import { useAuth } from "@/src/app/auth/AuthContext";
 
 export default function ProductDetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const id = useMemo(() => Number(params.id), [params.id]);
+  const { role } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
 
@@ -49,22 +47,26 @@ export default function ProductDetailsPage() {
 
         <div className="flex items-center gap-2">
           <BackLink href="/products" />
-          <Button onClick={() => router.push(`/products/${product.id}/edit`)}>
-            Editar
-          </Button>
-          <Popconfirm
-            title="Excluir produto?"
-            description="Essa ação não pode ser desfeita."
-            okText="Excluir"
-            cancelText="Cancelar"
-            okButtonProps={{ danger: true }}
-            onConfirm={() => {
-              deleteProduct(product.id);
-              router.push("/products");
-            }}
-          >
-            <Button danger>Excluir</Button>
-          </Popconfirm>
+          {role === "admin" && (
+            <>
+              <Button onClick={() => router.push(`/products/${product.id}/edit`)}>
+                Editar
+              </Button>
+              <Popconfirm
+                title="Excluir produto?"
+                description="Essa ação não pode ser desfeita."
+                okText="Excluir"
+                cancelText="Cancelar"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => {
+                  deleteProduct(product.id);
+                  router.push("/products");
+                }}
+              >
+                <Button danger>Excluir</Button>
+              </Popconfirm>
+            </>
+          )}
         </div>
       </div>
 

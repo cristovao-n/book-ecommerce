@@ -1,4 +1,4 @@
-import { Order, ShippingStatus } from "@/src/types/types";
+import { Order, PaymentMethod, ShippingStatus } from "@/src/types/types";
 
 const STORAGE_KEY = "orders";
 

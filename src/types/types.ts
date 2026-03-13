@@ -27,6 +27,7 @@ export interface CardProps {
   isIntoCart: (id: number) => boolean;
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
+  disableCartActions?: boolean;
 }
 
 export interface Product {
@@ -69,6 +70,7 @@ export interface Order {
   items: OrderLine[];
   shippingStatus: ShippingStatus;
   paymentMethod: PaymentMethod;
+  customerName: string;
 }
 
 export interface CheckoutItem {

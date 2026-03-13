@@ -37,6 +37,7 @@ export function Card(props: CardProps) {
     isIntoCart,
     onEdit,
     onDelete,
+    disableCartActions,
   } = props;
 
   const item: CartItem = {
@@ -47,6 +48,9 @@ export function Card(props: CardProps) {
   };
 
   const onAddItem = (id: number) => {
+    if (disableCartActions) {
+      return;
+    }
     if (estoque <= 0) {
       setNotifyType("warning");
       return;
@@ -168,15 +172,17 @@ export function Card(props: CardProps) {
           {onEdit || onDelete ? (
             <div className="flex items-center gap-2">
               <div className="flex-1">
-                <Tooltip title="Adicionar ao carrinho">
-                  <Button
-                    type="primary"
-                    icon={<ShoppingCart size={16} />}
-                    className="w-full h-10 flex items-center justify-center"
-                    onClick={() => onAddItem(id)}
-                    block
-                  />
-                </Tooltip>
+                {!disableCartActions && (
+                  <Tooltip title="Adicionar ao carrinho">
+                    <Button
+                      type="primary"
+                      icon={<ShoppingCart size={16} />}
+                      className="w-full h-10 flex items-center justify-center"
+                      onClick={() => onAddItem(id)}
+                      block
+                    />
+                  </Tooltip>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Tooltip title="Editar">
@@ -206,15 +212,17 @@ export function Card(props: CardProps) {
               </div>
             </div>
           ) : (
-            <Tooltip title="Adicionar ao carrinho">
-              <Button
-                type="primary"
-                icon={<ShoppingCart size={16} />}
-                className="w-full h-10 flex items-center justify-center"
-                onClick={() => onAddItem(id)}
-                block
-              />
-            </Tooltip>
+            !disableCartActions && (
+              <Tooltip title="Adicionar ao carrinho">
+                <Button
+                  type="primary"
+                  icon={<ShoppingCart size={16} />}
+                  className="w-full h-10 flex items-center justify-center"
+                  onClick={() => onAddItem(id)}
+                  block
+                />
+              </Tooltip>
+            )
           )}
         </div>
       </div>

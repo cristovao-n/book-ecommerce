@@ -11,9 +11,13 @@ import {
   DollarOutlined,
   FileDoneOutlined,
 } from "@ant-design/icons";
+import { useAuth } from "@/src/app/auth/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function OrdersManagementPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const { role } = useAuth();
+  const router = useRouter();
 
   const ShippingStatusInfo = {
     [ShippingStatus.SENT]: { title: "Enviado", index: 0 },
@@ -45,8 +49,12 @@ export default function OrdersManagementPage() {
   }));
 
   useEffect(() => {
+    if (role !== "admin") {
+      router.replace("/admin-login");
+      return;
+    }
     setOrders(listOrders());
-  }, []);
+  }, [role, router]);
 
   return (
     <main className="max-w-5xl mx-auto p-6 flex flex-col gap-6">
@@ -77,6 +85,9 @@ export default function OrdersManagementPage() {
                 <div className="flex flex-col">
                   <span className="text-lg font-semibold">
                     Pedido #{order.id}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    Cliente: {order.customerName || "Cliente desconhecido"}
                   </span>
 
                   <span className="text-sm text-gray-500">

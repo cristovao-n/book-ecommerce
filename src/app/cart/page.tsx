@@ -120,6 +120,10 @@ export default function CartPage() {
     null,
   );
   const [freteErro, setFreteErro] = useState("");
+  const [customerName, setCustomerName] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem("currentCustomerName") ?? "";
+  });
 
   useEffect(() => {
     setTotal(
@@ -166,7 +170,7 @@ export default function CartPage() {
       window.location.href = url;
     } catch (e) {
       notification.error({
-        message: "Não foi possível finalizar",
+        title: "Não foi possível finalizar",
         description:
           e instanceof Error ? e.message : "Erro ao processar o pedido.",
         placement: "bottomRight",
@@ -293,10 +297,20 @@ export default function CartPage() {
 
         <Button
           type="primary"
-          disabled={!cartItems.length || !freteSelecionado}
+          disabled={!cartItems.length || !freteSelecionado || !customerName.trim()}
           loading={isPlacing}
           onClick={async () => {
             try {
+              if (!customerName.trim()) {
+                notification.error({
+                  title: "Informe seu nome",
+                  description:
+                    "Digite seu nome para conseguirmos identificar seus pedidos depois.",
+                  placement: "bottomRight",
+                });
+                return;
+              }
+
               setIsPlacing(true);
 
               await ensureSeededProducts();
@@ -307,6 +321,13 @@ export default function CartPage() {
                   quantity: i.quantity,
                 })),
               );
+
+              if (typeof window !== "undefined") {
+                window.localStorage.setItem(
+                  "currentCustomerName",
+                  customerName.trim(),
+                );
+              }
 
               await createOrder({
                 createdAt: new Date().toISOString(),
@@ -319,10 +340,11 @@ export default function CartPage() {
                 })),
                 shippingStatus: ShippingStatus.SENT,
                 paymentMethod: metodoPagamento,
+                customerName: customerName.trim(),
               });
 
               notification.success({
-                message: "Pedido realizado",
+                title: "Pedido realizado",
                 description: "Seu pedido foi registrado com sucesso.",
                 placement: "bottomRight",
               });
@@ -331,7 +353,7 @@ export default function CartPage() {
               clearCart();
             } catch (e) {
               notification.error({
-                message: "Não foi possível finalizar",
+                title: "Não foi possível finalizar",
                 description:
                   e instanceof Error
                     ? e.message
@@ -365,9 +387,22 @@ export default function CartPage() {
           )}
         </section>
 
-        {/* Frete */}
+        {/* Cliente + Frete */}
         <section className="w-72 shrink-0">
           <div className="flex flex-col gap-3 px-4 py-4 m-1 bg-white shadow-md rounded">
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold text-gray-800">
+                Seu nome (para identificar pedidos)
+              </span>
+              <Input
+                placeholder="Digite seu nome"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+            </div>
+
+            <Divider className="my-2" />
+
             <div className="flex items-center gap-2">
               <Truck size={16} className="text-gray-600" />
               <span className="font-semibold text-gray-800">
