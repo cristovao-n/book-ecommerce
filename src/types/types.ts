@@ -73,6 +73,20 @@ export interface Order {
   customerName: string;
 }
 
+export type ActivityLogType =
+  | "PRODUCT_CREATED"
+  | "PRODUCT_DELETED"
+  | "ORDER_CREATED";
+
+export interface ActivityLog {
+  id: number;
+  type: ActivityLogType;
+  createdAt: string; // ISO
+  productName?: string;
+  orderId?: number;
+  customerName?: string;
+}
+
 export interface CheckoutItem {
   nome: string;
   preco: number;

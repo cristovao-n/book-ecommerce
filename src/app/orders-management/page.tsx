@@ -12,12 +12,13 @@ import {
   FileDoneOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/src/app/auth/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function OrdersManagementPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const { role } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const ShippingStatusInfo = {
     [ShippingStatus.SENT]: { title: "Enviado", index: 0 },
@@ -53,17 +54,25 @@ export default function OrdersManagementPage() {
       router.replace("/admin-login");
       return;
     }
-    setOrders(listOrders());
-  }, [role, router]);
+
+    const all = listOrders();
+    const orderIdParam = searchParams.get("orderId");
+
+    if (orderIdParam) {
+      const id = Number(orderIdParam);
+      if (Number.isFinite(id)) {
+        setOrders(all.filter((o) => o.id === id));
+        return;
+      }
+    }
+
+    setOrders(all);
+  }, [role, router, searchParams]);
 
   return (
     <main className="max-w-5xl mx-auto p-6 flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Gestão de Pedidos</h1>
-
-        <Link href="/products" className="text-blue-600 hover:underline">
-          Ver produtos
-        </Link>
       </div>
 
       {orders.length === 0 ? (

@@ -53,9 +53,6 @@ export default function OrdersPage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <h1 className="text-xl font-semibold">Pedidos</h1>
-          <Link href="/products" className="text-blue-600 hover:underline">
-            Ver produtos
-          </Link>
         </div>
 
         <div className="bg-white shadow-md rounded p-4 flex flex-col gap-2">
