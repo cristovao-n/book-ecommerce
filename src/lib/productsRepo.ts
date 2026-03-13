@@ -1,4 +1,8 @@
 import { Product } from "@/src/types/types";
+import {
+  logProductCreated,
+  logProductDeleted,
+} from "@/src/lib/activityLogsRepo";
 
 const STORAGE_KEY = "products";
 
@@ -104,6 +108,7 @@ export function createProduct(input: ProductInput): Product {
   const created: Product = { ...input, id: nextId(products) };
   const next = [created, ...products];
   writeAll(next);
+  logProductCreated(created.nome);
   return created;
 }
 
@@ -122,7 +127,11 @@ export function updateProduct(id: number, input: ProductInput): Product {
 
 export function deleteProduct(id: number) {
   const products = readAll();
+  const toDelete = products.find((p) => p.id === id);
   writeAll(products.filter((p) => p.id !== id));
+  if (toDelete) {
+    logProductDeleted(toDelete.nome);
+  }
 }
 
 export function decrementInventory(

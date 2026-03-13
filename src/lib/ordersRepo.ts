@@ -1,4 +1,5 @@
 import { Order, PaymentMethod, ShippingStatus } from "@/src/types/types";
+import { logOrderCreated } from "@/src/lib/activityLogsRepo";
 
 const STORAGE_KEY = "orders";
 
@@ -38,5 +39,6 @@ export function createOrder(input: Omit<Order, "id">): Order {
     id: nextId(orders),
   };
   writeAll([created, ...orders]);
+  logOrderCreated(created.id);
   return created;
 }

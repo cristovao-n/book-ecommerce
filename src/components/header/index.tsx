@@ -47,6 +47,15 @@ export const Header = () => {
           Produtos
         </Link>
 
+        {isAdmin && (
+          <Link
+            className="hover:text-blue-500 bold"
+            href={"/activity-logs"}
+          >
+            Registro de Atividades
+          </Link>
+        )}
+
         {!isAdmin && (
           <Link className="hover:text-blue-500 bold" href={"/orders"}>
             Pedidos
