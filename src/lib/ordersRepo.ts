@@ -1,4 +1,4 @@
-import { Order } from "@/src/types/types";
+import { Order, ShippingStatus } from "@/src/types/types";
 
 const STORAGE_KEY = "orders";
 
@@ -33,8 +33,10 @@ export function listOrders(): Order[] {
 
 export function createOrder(input: Omit<Order, "id">): Order {
   const orders = readAll();
-  const created: Order = { ...input, id: nextId(orders) };
+  const created: Order = {
+    ...input,
+    id: nextId(orders),
+  };
   writeAll([created, ...orders]);
   return created;
 }
-

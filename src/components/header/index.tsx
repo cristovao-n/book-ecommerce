@@ -20,6 +20,10 @@ export const Header = () => {
         <Link className="hover:text-blue-500 bold" href={"/orders"}>
           Pedidos
         </Link>
+
+        <Link className="hover:text-blue-500 bold" href={"/orders-management"}>
+          Gestão de Pedidos
+        </Link>
       </div>
 
       <Flex gap={10}>

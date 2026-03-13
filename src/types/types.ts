@@ -27,7 +27,7 @@ export interface CardProps {
   isIntoCart: (id: number) => boolean;
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
-};
+}
 
 export interface Product {
   id: number;
@@ -40,7 +40,7 @@ export interface Product {
   estoque: number;
 }
 
-export type NotificationType = 'success' | 'info' | 'warning' | 'error';
+export type NotificationType = "success" | "info" | "warning" | "error";
 
 export interface OrderLine {
   productId: number;
@@ -49,11 +49,26 @@ export interface OrderLine {
   quantity: number;
 }
 
+export enum ShippingStatus {
+  SENT = "sent",
+  ON_THE_WAY = "on_the_way",
+  SHIPPING_ROUTE = "shipping_route",
+  DELIVERED = "delivered",
+}
+
+export enum PaymentMethod {
+  CARD = "card",
+  PIX = "pix",
+  BOLETO = "boleto",
+}
+
 export interface Order {
   id: number;
   createdAt: string; // ISO
   total: number;
   items: OrderLine[];
+  shippingStatus: ShippingStatus;
+  paymentMethod: PaymentMethod;
 }
 
 export interface CheckoutItem {

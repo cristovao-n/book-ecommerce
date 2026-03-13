@@ -7,19 +7,35 @@ import {
   decrementInventory,
   ensureSeededProducts,
 } from "@/src/lib/productsRepo";
+import { PaymentMethod, ShippingStatus } from "@/src/types/types";
 import { formatCurrency } from "@/src/utils/utils";
-import { Button, Divider, Input, Radio, Spin, notification } from "antd";
+import {
+  Button,
+  Divider,
+  Input,
+  Radio,
+  Select,
+  Spin,
+  notification,
+} from "antd";
+import {
+  CreditCardOutlined,
+  DollarOutlined,
+  FileDoneOutlined,
+} from "@ant-design/icons";
 import { Search, Truck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const ORIGEM = { lat: -7.2306, lng: -35.8811 };
-const PRECO_POR_KM = 0.10;
+const PRECO_POR_KM = 0.1;
 const VELOCIDADE_KMH = 60;
 
 function calcularDistanciaKm(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
 ): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -70,10 +86,29 @@ async function buscarCoordenadasPorCidade(
   }
 }
 
+const PaymentMethodFormatter = {
+  [PaymentMethod.CARD]: {
+    title: "Cartão",
+    icon: <CreditCardOutlined />,
+  },
+  [PaymentMethod.PIX]: {
+    title: "Pix",
+    icon: <DollarOutlined />,
+  },
+  [PaymentMethod.BOLETO]: {
+    title: "Boleto",
+    icon: <FileDoneOutlined />,
+  },
+};
+
 export default function CartPage() {
   const { cartItems, setItemQuantity, removeCartItem, clearCart } = useCart();
   const [total, setTotal] = useState<number>(0);
   const [isPlacing, setIsPlacing] = useState(false);
+  const [metodoPagamento, setMetodoPagamento] = useState<PaymentMethod>(
+    PaymentMethod.CARD,
+  );
+
   const router = useRouter();
 
   const [cep, setCep] = useState("");
@@ -81,12 +116,17 @@ export default function CartPage() {
   const [endereco, setEndereco] = useState<EnderecoViaCep | null>(null);
   const [distanciaKm, setDistanciaKm] = useState<number | null>(null);
   const [freteOpcoes, setFreteOpcoes] = useState<FreteOption[]>([]);
-  const [freteSelecionado, setFreteSelecionado] = useState<FreteOption | null>(null);
+  const [freteSelecionado, setFreteSelecionado] = useState<FreteOption | null>(
+    null,
+  );
   const [freteErro, setFreteErro] = useState("");
 
   useEffect(() => {
     setTotal(
-      cartItems.reduce((acc, current) => acc + current.preco * current.quantity, 0),
+      cartItems.reduce(
+        (acc, current) => acc + current.preco * current.quantity,
+        0,
+      ),
     );
   }, [cartItems]);
 
@@ -123,13 +163,12 @@ export default function CartPage() {
       }
 
       const { url } = await res.json();
-
       window.location.href = url;
-
     } catch (e) {
       notification.error({
         message: "Não foi possível finalizar",
-        description: e instanceof Error ? e.message : "Erro ao processar o pedido.",
+        description:
+          e instanceof Error ? e.message : "Erro ao processar o pedido.",
         placement: "bottomRight",
       });
       setIsPlacing(false);
@@ -155,24 +194,35 @@ export default function CartPage() {
       const dadosCep = await resCep.json();
 
       if (dadosCep.erro) {
-        setFreteErro("CEP não encontrado. Verifique e tente novamente.");
+        setFreteErro("CEP não encontrado.");
         return;
       }
 
       setEndereco(dadosCep);
 
-      const coords = await buscarCoordenadasPorCidade(dadosCep.localidade, dadosCep.uf);
+      const coords = await buscarCoordenadasPorCidade(
+        dadosCep.localidade,
+        dadosCep.uf,
+      );
 
       if (!coords) {
-        setFreteErro("Não foi possível calcular a distância para este CEP.");
+        setFreteErro("Não foi possível calcular a distância.");
         return;
       }
 
-      const distancia = calcularDistanciaKm(ORIGEM.lat, ORIGEM.lng, coords.lat, coords.lng);
+      const distancia = calcularDistanciaKm(
+        ORIGEM.lat,
+        ORIGEM.lng,
+        coords.lat,
+        coords.lng,
+      );
+
       const distanciaArredondada = Math.round(distancia);
       setDistanciaKm(distanciaArredondada);
 
-      const precoPAC = parseFloat(((distanciaArredondada / 10) * PRECO_POR_KM + 15).toFixed(2));
+      const precoPAC = parseFloat(
+        ((distanciaArredondada / 10) * PRECO_POR_KM + 15).toFixed(2),
+      );
       const precoSEDEX = parseFloat((precoPAC * 1.6).toFixed(2));
 
       const prazoNormal = calcularPrazoUtil(distanciaArredondada);
@@ -186,7 +236,7 @@ export default function CartPage() {
       setFreteOpcoes(opcoes);
       setFreteSelecionado(opcoes[0]);
     } catch {
-      setFreteErro("Erro ao calcular o frete. Tente novamente.");
+      setFreteErro("Erro ao calcular o frete.");
     } finally {
       setLoadingFrete(false);
     }
@@ -203,8 +253,11 @@ export default function CartPage() {
     <main className="max-w-5xl mx-auto">
       <section className="flex mt-2 items-center gap-4 px-4 py-4 m-1 bg-white shadow-md rounded">
         <h1>Carrinho</h1>
+
         <span>Total de items: {cartItems.length}</span>
+
         <Divider orientation="vertical" />
+
         <span>
           Total: {formatCurrency(totalComFrete)}
           {freteSelecionado && (
@@ -213,7 +266,31 @@ export default function CartPage() {
             </span>
           )}
         </span>
+
         <div className="flex-1" />
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Pagamento:</span>
+
+          <Select
+            value={metodoPagamento}
+            style={{ width: 160 }}
+            disabled={cartItems.length == 0}
+            onChange={(v: PaymentMethod) => setMetodoPagamento(v)}
+            options={Object.entries(PaymentMethodFormatter).map(
+              ([key, info]) => ({
+                value: key,
+                label: (
+                  <div className="flex items-center gap-2">
+                    {info.icon}
+                    {info.title}
+                  </div>
+                ),
+              }),
+            )}
+          />
+        </div>
+
         <Button
           type="primary"
           disabled={!cartItems.length || !freteSelecionado}
@@ -221,10 +298,16 @@ export default function CartPage() {
           onClick={async () => {
             try {
               setIsPlacing(true);
+
               await ensureSeededProducts();
+
               await decrementInventory(
-                cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })),
+                cartItems.map((i) => ({
+                  productId: i.id,
+                  quantity: i.quantity,
+                })),
               );
+
               await createOrder({
                 createdAt: new Date().toISOString(),
                 total: totalComFrete,
@@ -234,19 +317,25 @@ export default function CartPage() {
                   preco: i.preco,
                   quantity: i.quantity,
                 })),
+                shippingStatus: ShippingStatus.SENT,
+                paymentMethod: metodoPagamento,
               });
+
               notification.success({
-                title: "Pedido realizado",
+                message: "Pedido realizado",
                 description: "Seu pedido foi registrado com sucesso.",
                 placement: "bottomRight",
               });
+
               await handleCheckout();
               clearCart();
             } catch (e) {
               notification.error({
-                title: "Não foi possível finalizar",
+                message: "Não foi possível finalizar",
                 description:
-                  e instanceof Error ? e.message : "Erro ao processar o pedido.",
+                  e instanceof Error
+                    ? e.message
+                    : "Erro ao processar o pedido.",
                 placement: "bottomRight",
               });
             } finally {
@@ -256,11 +345,6 @@ export default function CartPage() {
         >
           Finalizar compra
         </Button>
-        {cartItems.length > 0 && !freteSelecionado && (
-          <span className="text-xs text-amber-500">
-            Calcule o frete para continuar
-          </span>
-        )}
       </section>
 
       <Divider className="p-4" />
@@ -280,11 +364,15 @@ export default function CartPage() {
             <span>Carrinho vazio</span>
           )}
         </section>
+
+        {/* Frete */}
         <section className="w-72 shrink-0">
           <div className="flex flex-col gap-3 px-4 py-4 m-1 bg-white shadow-md rounded">
             <div className="flex items-center gap-2">
               <Truck size={16} className="text-gray-600" />
-              <span className="font-semibold text-gray-800">Simule seu frete</span>
+              <span className="font-semibold text-gray-800">
+                Simule seu frete
+              </span>
             </div>
 
             <div className="flex gap-2">
@@ -322,20 +410,19 @@ export default function CartPage() {
                 <p className="font-medium text-gray-700">
                   {endereco.localidade} - {endereco.uf}
                 </p>
-                {endereco.logradouro && (
-                  <p>{endereco.logradouro}, {endereco.bairro}</p>
-                )}
               </div>
             )}
 
             {freteOpcoes.length > 0 && !loadingFrete && (
               <>
                 <Divider className="my-1" />
+
                 <Radio.Group
                   value={freteSelecionado?.servico}
                   onChange={(e) =>
                     setFreteSelecionado(
-                      freteOpcoes.find((o) => o.servico === e.target.value) ?? null,
+                      freteOpcoes.find((o) => o.servico === e.target.value) ??
+                        null,
                     )
                   }
                   className="flex flex-col gap-2"
@@ -347,6 +434,7 @@ export default function CartPage() {
                           <p className="text-sm font-medium">{opcao.servico}</p>
                           <p className="text-xs text-gray-400">{opcao.prazo}</p>
                         </div>
+
                         <span className="text-sm font-semibold text-gray-700">
                           {formatCurrency(opcao.preco)}
                         </span>
@@ -355,12 +443,6 @@ export default function CartPage() {
                   ))}
                 </Radio.Group>
               </>
-            )}
-
-            {!endereco && !loadingFrete && !freteErro && (
-              <p className="text-xs text-gray-400 text-center">
-                Digite seu endereço para ver as opções de entrega.
-              </p>
             )}
           </div>
         </section>
