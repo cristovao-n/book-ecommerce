@@ -23,11 +23,7 @@ export const Header = () => {
     router.push("/admin-login");
   };
 
-  const cartIcon = (
-    <ShoppingCart
-      className={isAdmin && isOnProductsPage ? "text-gray-400 cursor-not-allowed" : ""}
-    />
-  );
+  const cartIcon = <ShoppingCart />;
 
   return (
     <header className="flex items-center justify-between px-2 py-4 m-1 bg-white shadow-md rounded flex-wrap">
@@ -72,13 +68,11 @@ export const Header = () => {
       <Flex gap={10} align="center">
         <div className="flex items-center gap-3 pr-5">
           <ul className="flex flex-row gap-6 items-center">
-            <li>
-              {isAdmin && isOnProductsPage ? (
-                <span>{cartIcon}</span>
-              ) : (
+            {!isAdmin && (
+              <li>
                 <Link href="/cart">{cartIcon}</Link>
-              )}
-            </li>
+              </li>
+            )}
             <li className="flex items-center gap-2">
               <UserRound />
               {isAdmin ? (

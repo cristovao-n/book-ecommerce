@@ -167,10 +167,10 @@ export function SuccessPageClient() {
             </>
           ) : (
             <Link
-              href="/cart"
+              href="/products"
               className="w-full text-center bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium py-3 rounded-xl transition-colors"
             >
-              Voltar ao carrinho
+              Voltar às compras
             </Link>
           )}
         </div>
