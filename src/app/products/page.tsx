@@ -13,6 +13,7 @@ import {
   ensureSeededProducts,
   listProducts,
 } from "@/src/lib/productsRepo";
+import { useAuth } from "@/src/app/auth/AuthContext";
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,6 +25,7 @@ export default function Products() {
   const pageSizeOptions = [5, 10, 20, 50];
   const { toggleFavorite, favorites } = useFavorites();
   const { addItemToCart, isIntoCart } = useCart();
+  const { role } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -79,12 +81,14 @@ export default function Products() {
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
         <div className="w-full flex items-center justify-between">
           <h1 className="text-xl font-semibold">Produtos</h1>
-          <Link
-            href="/products/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          >
-            Novo produto
-          </Link>
+          {role === "admin" && (
+            <Link
+              href="/products/new"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            >
+              Novo produto
+            </Link>
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-3">
@@ -152,8 +156,13 @@ export default function Products() {
               toggleFavorite={toggleFavorite}
               addItemToCart={addItemToCart}
               isIntoCart={isIntoCart}
-              onEdit={(id) => router.push(`/products/${id}/edit`)}
-              onDelete={onDelete}
+              disableCartActions={role === "admin"}
+              onEdit={
+                role === "admin"
+                  ? (id) => router.push(`/products/${id}/edit`)
+                  : undefined
+              }
+              onDelete={role === "admin" ? onDelete : undefined}
             />
           ))}
         </div>
