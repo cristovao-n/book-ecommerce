@@ -129,9 +129,9 @@ export default function OrdersPage() {
                         {it.quantity} x {formatCurrency(it.preco)}
                       </span>
                       {it.isEbook && (
-                        <span className="text-xs text-blue-600 underline cursor-pointer">
+                        <a href="https://www.google.com" target="_blank" className="text-xs text-blue-600 underline cursor-pointer">
                           Baixar ebook
-                        </span>
+                        </a>
                       )}
                     </div>
                     <span className="font-semibold">
